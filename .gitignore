@@ -1,0 +1,9 @@
+CodexBuddy.crash.log
+Benchmarks/
+.artifacts/
+dist/
+release/bin/
+release/obj/
+linux/__pycache__/
+*.pyc
+*.zip
