@@ -1,187 +1,104 @@
-# CodexGPT MCP
+# Codex Buddy
 
-**CodexGPT MCP** is a Windows MCP release that lets Codex hand work to your signed in ChatGPT browser session, wait for ChatGPT to finish, and bring the answer back into Codex.
+Codex Buddy is a small Windows and Linux overlay for Codex Desktop telemetry. It reads local Codex session JSONL files under `%USERPROFILE%\.codex\sessions` on Windows or `~/.codex/sessions` on Linux and shows live task speed, token flow, context use, rate-limit windows, and Codex process stats.
 
-This public repository is for **release downloads and setup documentation**. The source code is kept in a private TnT Studios development repository.
+## Run It
 
-## Latest Release
-
-Current production release:
+From this folder, double-click:
 
 ```text
-CodexGPT MCP v1.0.0
+Start-CodexBuddy.cmd
 ```
 
-Download it here:
+From PowerShell:
 
-```text
-https://github.com/TnT-Studio-s/TnTs-CodexGPT-MCP/releases/latest
+```bat
+cd "C:\Users\antho\OneDrive\Documents\Codex Buddy"
+Start-CodexBuddy.cmd
 ```
 
-Windows asset:
-
-```text
-CodexGPT-MCP-1.0.0-windows.zip
-```
-
-SHA256:
-
-```text
-091452303BAA7BF8B2D6888847AF79D1EC359AEEED03C848BD49F8ABEA792B59
-```
-
-## What It Does
-
-CodexGPT MCP gives Codex a local MCP tool bridge into ChatGPT Web.
-
-It can:
-
-* Open or reuse a managed ChatGPT browser session.
-* Detect when you need to sign in.
-* Wait while you sign in manually.
-* Start a new ChatGPT conversation.
-* Send prompts from Codex to ChatGPT.
-* Wait for ChatGPT to finish responding.
-* Bring the final response back into Codex.
-* Try UI based model selection and Deep Research when your ChatGPT account exposes those controls.
-* Export the latest response to a file.
-* Extract links from responses.
-* Run health checks with clear fix instructions.
-* Build prompt templates for research, code review, comparison, and summarizing.
-* Retry the last delegated task safely.
-
-## How It Works
-
-At a high level:
-
-1. Codex starts the local MCP server from the extracted release folder.
-2. The MCP server opens or attaches to a managed ChatGPT browser window.
-3. You sign in to ChatGPT manually the first time.
-4. Codex calls MCP tools such as `chatgpt_delegate`.
-5. The MCP server sends the prompt to ChatGPT Web.
-6. ChatGPT does the research, reasoning, or answering inside your normal signed in account.
-7. The MCP server reads the final response and returns it to Codex.
-
-This is browser automation, not an official ChatGPT API. That means ChatGPT UI changes can affect behavior, and you should keep normal account safety in mind.
-
-## Easiest Setup With Codex
-
-This guide is meant to be read by your Codex instance too.
-
-Simple path:
-
-1. Download the latest Windows zip.
-2. Extract the folder somewhere normal, like Downloads or Documents.
-3. Tell Codex where the extracted folder is.
-4. Tell Codex to read `CODEX_SETUP_HANDOFF.md` and install it for you.
-5. Restart Codex when the install is done.
-6. After restart, tell Codex to open ChatGPT through CodexGPT MCP.
-
-You normally do **not** run the `.exe` yourself. The executable is the MCP server that Codex starts after installation.
-
-## Manual Install
-
-After extracting the zip, open PowerShell in the extracted folder and run:
+Or directly:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install-codexgpt-mcp.ps1
+cd "C:\Users\antho\OneDrive\Documents\Codex Buddy"
+powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File .\CodexBuddy.ps1
 ```
 
-Then restart Codex.
+Live limit audit (Spark vs normal):
 
-The installer updates your user level Codex config so CodexGPT MCP is available across Codex projects.
-
-## First Test
-
-After restarting Codex, ask Codex:
-
-```text
-Use chatgpt_open.
+```powershell
+cd "C:\Users\antho\OneDrive\Documents\Codex Buddy"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\CodexBuddy.ps1 -DumpLimitEvents
 ```
 
-If ChatGPT asks you to sign in, sign in manually in the browser window.
+The display is always on top and can be dragged from anywhere on the panel. Close it with the `X` button.
 
-Then ask Codex:
+## Linux
 
-```text
-Use chatgpt_wait_for_login.
+The Linux edition is designed to run beside the unofficial Electron-based [Codex Desktop for Linux](https://github.com/ilysenko/codex-desktop-linux). It reads the shared local `~/.codex` session stream; it does not inject into or modify the Codex app.
+
+Install the small user-level launcher from this checkout:
+
+```bash
+bash ./linux/install.sh
+codex-buddy
 ```
 
-Then run a smoke test:
+If you received the flat ZIP package, extract it and run `bash ./install.sh` from the extracted folder instead. The installer accepts both layouts, so the package can be copied or extracted by standard Linux tools without preserving a `linux/` directory.
 
-```text
-Use chatgpt_delegate to ask ChatGPT: Reply with exactly "CodexGPT MCP is working."
+Tkinter is the only Linux GUI dependency. If the installer reports it missing, install `python3-tk` on Debian/Ubuntu, `python3-tkinter` on Fedora, or `tk` on Arch. The Linux dashboard includes session status, model, token/context usage, prompt cost, rate-limit windows, tool activity, Codex process memory, long-context warnings, automatic refresh, and `--once` JSON output.
+
+For a direct checkout run:
+
+```bash
+bash ./Start-CodexBuddy.sh
+bash ./Start-CodexBuddy.sh --once
 ```
 
-If Codex receives that exact response, the bridge is live.
+## Benchmark Workflow
 
-## Are The Tools Commands?
+1. Select one conversation tab, then click `Bench`.
+2. Send exactly one test prompt in that conversation.
+3. Codex Buddy finishes the run automatically at `task_complete` and records timing, token speeds, tools, calls, model, tier, context, and cost.
+4. Open `Info` to compare saved runs. Use `Export benchmarks` to write a Markdown print-off under `Documents\Codex Buddy\Benchmarks`.
 
-The `chatgpt_*` tools are MCP tools, not normal PowerShell commands.
+## Release Model
 
-You use them by asking Codex to call them. Codex sees the tools, chooses parameters, runs them, waits for the result, and shows you the answer.
+This project is intended to live in a private source repo, with a separate public repo that only publishes release downloads. See [PUBLISHING.md](./PUBLISHING.md) for the exact workflow and the source-protection caveat.
+The release build creates a compiled `CodexBuddy.exe` plus release notes in `.artifacts/release/`.
 
-Main tools:
+## What It Shows
 
-| Tool | What it does |
-| --- | --- |
-| `chatgpt_open` | Opens or attaches to the managed ChatGPT browser session. |
-| `chatgpt_status` | Reports browser, login, and readiness state. |
-| `chatgpt_wait_for_login` | Waits while you sign in manually. |
-| `chatgpt_new_chat` | Starts a clean ChatGPT conversation. |
-| `chatgpt_select_model` | Attempts UI based model selection by label. |
-| `chatgpt_enable_deep_research` | Attempts to enable visible Deep Research UI. |
-| `chatgpt_get_last_response` | Reads the latest visible ChatGPT assistant response. |
-| `chatgpt_delegate` | Sends a prompt and waits for the completed response. |
-| `chatgpt_retry_last` | Repeats the last delegated task. |
-| `chatgpt_export_last_response` | Saves the latest response as md, txt, or json. |
-| `chatgpt_extract_links` | Extracts structured URLs from text or the latest response. |
-| `chatgpt_health_check` | Checks setup and gives exact fix guidance. |
-| `chatgpt_prompt_template` | Builds reusable prompts for common workflows. |
-| `chatgpt_client_info` | Reports backend mode and capability flags. |
+- `model speed`: token delta per minute and tokens per second from the latest Codex session log.
+- `speed of use`: recent event cadence and tool-call rate.
+- `tokens`: total and last-turn token counts from Codex's local telemetry events.
+- `context`: latest-turn tokens as a percentage of the model context window.
+- `model pricing`: recognizes GPT-5.6 Sol, Terra, and Luna plus the supported GPT-5.5/GPT-5.4 families, showing standard and long-context API input/output prices per 1M tokens.
+- `prompt costs`: shows the current prompt cost plus the five most recent prompt costs, with model, token counts, relative cost points, and estimated API cost for model comparisons.
+- `benchmark mode`: arm the selected conversation for one prompt, automatically capture the completed turn's timing, token speeds, tools, calls, model, tier, context, and cost, then review or export side-by-side Markdown reports.
+- long-context alerts: an over-272K GPT-5.4/GPT-5.5 event, or an overrun of the active model's reported context window, is counted and kept visible until you click the red `OVER n` badge to accept it. The acknowledgement ledger survives Codex Buddy restarts under `%LOCALAPPDATA%\CodexBuddy\long-context-alerts.json`.
+- `weekly remaining`: Codex's current weekly usage bucket, including used/remaining percentage and reset countdown. If Codex later supplies another limit bucket, Buddy shows it separately.
+- telemetry detail: exact completed-task duration and first-token time, cache-write input, modern custom tool calls, rate-limit metadata, session source, Git identity, and recent context-compaction events when Codex writes them locally.
+- cache efficiency: cache-hit percentage, uncached input, and last-prompt cache reuse from Codex token counters.
+- task performance: recent completed-task count, average/median duration, and average time to first token from the retained session-log window.
+- usage forecast: a local, reset-cycle-aware usage-rate estimate. It starts as `learning`, then reports a projection only after it has enough persisted local samples.
+- `process speed`: matching Codex/Code process count, CPU delta, and working-set memory.
+- Graphs: rolling `tokens/min`, process CPU, use-speed/event cadence, and remaining available usage buckets.
 
-## Speed Modes
+## Accuracy Notes
 
-CodexGPT MCP cannot make ChatGPT search or think faster. That part takes as long as ChatGPT takes.
+The usage-limit values are not scraped from your account page. They are read from the local `event_msg` records Codex Desktop writes during active turns. If Codex has not emitted a fresh token-count event yet, those fields can show `n/a` or the last locally logged value.
 
-What it can make faster is the local handoff between Codex and ChatGPT.
+For unusually large session logs, prompt-history and benchmark aggregates initialize from a bounded recent log tail so the dashboard stays responsive; current-session and current-turn telemetry remain live.
 
-Default stable mode:
+Usage forecasts are local estimates based only on Buddy's persisted usage-percent observations for the active reset cycle. They are not account billing data or an official Codex exhaustion prediction.
 
-```text
-CHATGPT_SPEED_MODE=token_saver
+The speed numbers are local estimates from file growth, event cadence, and token deltas. They are useful for a quick on-screen pulse check, not billing-grade measurement.
+
+If you want Spark to show separately, run one short Spark-only Codex call, then run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\CodexBuddy.ps1 -DumpLimitEvents -DumpLimitEventCount 20
 ```
 
-Faster local polling mode:
-
-```text
-CHATGPT_SPEED_MODE=max_speed
-```
-
-Use max speed when you want Codex to notice completed ChatGPT responses as quickly as possible.
-
-## Current Production Path
-
-Browser mode is the supported production path right now.
-
-Windows app automation exists as an experimental target in the private source, but public users should use browser mode until parity is proven.
-
-## Safety Notes
-
-CodexGPT MCP never asks for your ChatGPT password.
-
-You sign in directly inside the ChatGPT browser window.
-
-Do not share browser profile folders that contain login state.
-
-Delegated prompts are sent to ChatGPT through your own signed in account.
-
-## TnT Studios
-
-This is the first live TnT Studios production release of CodexGPT MCP.
-
-Use Codex for coding.
-
-Use ChatGPT for research.
-
-Let CodexGPT MCP bridge the two.
+If the same `LimitId` shows up for Spark and non-Spark calls, then local session telemetry is not separated in this stream.
